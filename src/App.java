@@ -1,123 +1,98 @@
-/**
- * This Java program represents a simple Task Manager application.
- * Users can add tasks, mark tasks as completed, and view the list of tasks.
- * Input validation is implemented to handle user input errors gracefully.
- *
- * The program consists of two classes: Task and TaskManager. The Task class
- * represents an individual task with a description and completion status,
- * while the TaskManager class manages a list of tasks and provides
- * functionality to interact with them.
- *
- * The TaskManagerApp class contains the main method to run the Task Manager application.
- *
- * by: Jawad
- */
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+public class App extends Application {
+    private TaskManager taskManager; // TaskManager instance to manage tasks
+    private ListView<String> taskListView; // ListView to display tasks
 
-class Task {
-    private String description;
-    private boolean completed;
-
-    public Task(String description) {
-        this.description = description;
-        this.completed = false;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void markAsCompleted() {
-        this.completed = true;
+    public static void main(String[] args) {
+        launch(args);
     }
 
     @Override
-    public String toString() {
-        return "[" + (completed ? "X" : " ") + "] " + description;
+    public void start(Stage primaryStage) {
+        taskManager = new TaskManager(); // Create an instance of TaskManager
+
+        primaryStage.setTitle("Task Manager");
+
+        // Create the main layout container (VBox)
+        VBox vbox = new VBox();
+        vbox.setPadding(new Insets(10));
+        vbox.setSpacing(10);
+
+        // Text field for entering task description
+        TextField taskDescriptionField = new TextField();
+        taskDescriptionField.setPromptText("Enter task description");
+
+        // Button to add a new task
+        Button addButton = new Button("Add Task");
+        addButton.setOnAction(e -> addTask(taskDescriptionField.getText()));
+
+        // Button to mark the selected task as completed
+        Button completeButton = new Button("Mark as Completed");
+        completeButton.setOnAction(e -> markTaskAsCompleted());
+
+        // ListView to display tasks
+        taskListView = new ListView<>();
+        taskListView.setPrefHeight(200);
+
+        // Add UI components to the VBox
+        vbox.getChildren().addAll(taskDescriptionField, addButton, completeButton, taskListView);
+
+        // Create the main scene
+        Scene scene = new Scene(vbox, 300, 300);
+        primaryStage.setScene(scene);
+
+        primaryStage.show();
     }
-}
 
-class TaskManager {
-    private ArrayList<Task> tasks;
-    private Scanner scanner;
-
-    public TaskManager() {
-        this.tasks = new ArrayList<>();
-        this.scanner = new Scanner(System.in);
-    }
-
-    public void addTask(String description) {
-        Task task = new Task(description);
-        tasks.add(task);
-        System.out.println("Task added: " + description);
-    }
-
-    public void markTaskAsCompleted(int index) {
-        if (index >= 0 && index < tasks.size()) {
-            Task task = tasks.get(index);
-            task.markAsCompleted();
-            System.out.println("Task marked as completed: " + task.getDescription());
-        } else {
-            System.out.println("Invalid task index");
+    // Method to add a new task
+    private void addTask(String description) {
+        if (!description.isEmpty()) {
+            taskManager.addTask(description);
+            updateTaskList();
         }
     }
 
-    public void displayTasks() {
-        if (tasks.isEmpty()) {
-            System.out.println("No tasks found");
+    // Method to mark the selected task as completed
+    private void markTaskAsCompleted() {
+        int selectedIndex = taskListView.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+            taskManager.markTaskAsCompleted(selectedIndex);
+            updateTaskList();
         } else {
-            System.out.println("Tasks:");
-            for (int i = 0; i < tasks.size(); i++) {
-                System.out.println(i + ". " + tasks.get(i));
-            }
+            showAlert("Select a task to mark as completed");
         }
     }
 
-    public void startTaskManager() {
-        int choice;
-        do {
-            try {
-                System.out.println("\nTask Manager Menu:");
-                System.out.println("1. Add Task");
-                System.out.println("2. Mark Task as Completed");
-                System.out.println("3. Display Tasks");
-                System.out.println("0. Exit");
-                System.out.print("Enter your choice: ");
-                choice = scanner.nextInt();
+    // Method to update the task list in the ListView
+    private void updateTaskList() {
+        taskListView.getItems().clear();
 
-                switch (choice) {
-                    case 1:
-                        System.out.print("Enter task description: ");
-                        scanner.nextLine(); // Consume the newline character
-                        String description = scanner.nextLine();
-                        addTask(description);
-                        break;
-                    case 2:
-                        System.out.print("Enter task index to mark as completed: ");
-                        int index = scanner.nextInt();
-                        markTaskAsCompleted(index);
-                        break;
-                    case 3:
-                        displayTasks();
-                        break;
-                    case 0:
-                        System.out.println("Exiting Task Manager. Goodbye!");
-                        break;
-                    default:
-                        System.out.println("Invalid choice. Please try again.");
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); // Consume the invalid input
-                choice = -1; // Set choice to -1 to force re-entering the loop
+        // Iterate through tasks and display them in the ListView
+        for (TaskManager.Task task : taskManager.getTasks()) {
+            String description = task.getDescription();
+            String note = task.getNote();
+
+            // Append note information for completed tasks
+            if (task.isCompleted() && note != null) {
+                description += " (Completed: " + note + ")";
             }
-        } while (choice != 0);
+
+            taskListView.getItems().add(description);
+        }
+    }
+
+    // Method to show an alert message
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Task Manager");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
