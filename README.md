@@ -51,6 +51,7 @@ The project is organized into two main classes:
 
 1. **Prerequisites:**
    - JavaFX properly configured in your development environment.
+   - link to download if you don't have it: https://download2.gluonhq.com/openjfx/21.0.2/openjfx-21.0.2_windows-x64_bin-sdk.zip
 
 2. **Execution:**
    - Open the project in your Java development environment.
