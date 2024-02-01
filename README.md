@@ -4,6 +4,11 @@
 
 The Task Management Application is a Java-based tool designed to help users manage their tasks efficiently. This application provides both a console-based and a graphical user interface (GUI) version, allowing users to add tasks, mark tasks as completed, and view their task list.
 
+![task](https://github.com/7awad/Task-Management-Application-/assets/123418692/11da65ba-6f38-4b3e-83cd-46998b5dbb54)
+
+
+
+
 ## Project Structure
 
 The project is organized into two main classes:
